@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import Message from './models/Message.js';
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 const app = express();
 app.use(cors());
@@ -9,7 +12,7 @@ app.use(express.json());
 
 const connect = async () => {
     try {
-        await mongoose.connect("mongodb+srv://manojc2004:WbswPxuS9gkIsFQ0@clusterdatashare.zafzitl.mongodb.net/")
+        await mongoose.connect(process.env.MONGO_URI)
     } catch (error) {
         console.log(error);
 
@@ -45,7 +48,7 @@ app.get('/api/message/:token', async (req, res) => {
     }
 })
 
-app.listen(5000, () => {
+app.listen(process.env.PORT, () => {
     connect();
     console.log("Server is running on port 5000");
 });

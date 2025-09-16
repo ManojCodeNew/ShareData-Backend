@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config()
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 const connect = async () => {
@@ -23,13 +23,20 @@ const genrateToken = () => {
     return Math.floor(1000 + Math.random() * 9000);
 }
 app.post('/api/message', async (req, res) => {
-    const { message } = req.body;
-    if (!message) {
-        return res.status(400).json({ message: "Message is required" });
+    try {
+        const { message } = req.body;
+        if (!message) {
+            return res.status(400).json({ message: "Message is required" });
+        }
+        const newMessage = new Message({ message, token: genrateToken() });
+        await newMessage.save();
+        res.json({ message: "Message saved successfully", token: newMessage.token });
+
+    } catch (error) {
+        console.error("Error saving message:", error); // 👈 log actual error
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+
     }
-    const newMessage = new Message({ message, token: genrateToken() });
-    await newMessage.save();
-    res.json({ message: "Message saved successfully", token: newMessage.token });
 })
 
 app.get('/api/message/:token', async (req, res) => {
